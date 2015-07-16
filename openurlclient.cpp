@@ -1,20 +1,27 @@
+#include <jni.h>
 #include "openurlclient.h"
 
-#include <QtAndroidExtras/QAndroidJniObject>
+OpenUrlClient* OpenUrlClient::m_instance = NULL;
 
 OpenUrlClient::OpenUrlClient(QObject *parent)
     : QObject(parent)
 {
-    connect(this, SIGNAL(urlClicked()), this, SLOT(updateAndroidUrlClicked()));
+    connect(this, SIGNAL(urlSelected(QString)), this, SLOT(setUrl(QString)));
+    m_instance = this;
+}
+
+OpenUrlClient* OpenUrlClient::getInstance()
+{
+    if (!m_instance)
+        m_instance = new OpenUrlClient;
+    return m_instance;
 }
 
 void OpenUrlClient::setUrl(const QString &url)
 {
     if (m_url == url)
         return;
-
     m_url = url;
-    emit urlClicked();
 }
 
 QString OpenUrlClient::url() const
@@ -22,11 +29,23 @@ QString OpenUrlClient::url() const
     return m_url;
 }
 
-void OpenUrlClient::updateAndroidUrlClicked()
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+JNIEXPORT void JNICALL
+  Java_poc_intent_OpenUrlClient_setUrl(JNIEnv *env,
+                                        jobject obj,
+                                        jstring url)
 {
-    QAndroidJniObject javaUrl = QAndroidJniObject::fromString(m_url);
-    QAndroidJniObject::callStaticMethod<void>("poc/intent/OpenUrlClient",
-                                       "openUrl",
-                                       "(Ljava/lang/String;)V",
-                                       javaUrl.object<jstring>());
+    const char *urlStr = env->GetStringUTFChars(url, NULL);
+    //emit OpenUrlClient::getInstance()->urlSelected(urlStr);
+    OpenUrlClient::getInstance()->setUrl(urlStr);
+
+    env->ReleaseStringUTFChars(url, urlStr);
+    return;
 }
+
+#ifdef __cplusplus
+}
+#endif

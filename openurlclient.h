@@ -6,21 +6,21 @@
 class OpenUrlClient : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString url READ url WRITE setUrl NOTIFY urlClicked)
+    Q_PROPERTY(QString url READ url WRITE setUrl NOTIFY urlSelected)
 public:
     explicit OpenUrlClient(QObject *parent = 0);
-
-    void setUrl(const QString &url);
     QString url() const;
+    static OpenUrlClient* getInstance();
+
+public slots:
+    void setUrl(const QString &url);
 
 signals:
-    void urlClicked();
-
-private slots:
-    void updateAndroidUrlClicked();
+    void urlSelected(const QString &url);
 
 private:
     QString m_url;
+    static OpenUrlClient* m_instance;
 };
 
 #endif
