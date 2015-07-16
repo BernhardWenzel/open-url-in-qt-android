@@ -1,13 +1,17 @@
 #include <jni.h>
+#include <QVariant>
+
 #include "openurlclient.h"
 
 OpenUrlClient* OpenUrlClient::m_instance = NULL;
 
-OpenUrlClient::OpenUrlClient(QObject *parent)
+OpenUrlClient::OpenUrlClient(QObject *parent, QObject *root)
     : QObject(parent)
 {
-    connect(this, SIGNAL(urlSelected(QString)), this, SLOT(setUrl(QString)));
+    // using signal slot approach
+    //connect(this, SIGNAL(urlSelected(QString)), this, SLOT(setUrl(QString)));
     m_instance = this;
+    m_root = root;
 }
 
 OpenUrlClient* OpenUrlClient::getInstance()
@@ -21,6 +25,9 @@ void OpenUrlClient::setUrl(const QString &url)
 {
     if (m_url == url)
         return;
+    QObject *urlText = m_root->findChild<QObject*>("urlText");
+    if (urlText)
+        urlText->setProperty("text", "You clicked on: " + url);
     m_url = url;
 }
 
@@ -39,9 +46,11 @@ JNIEXPORT void JNICALL
                                         jstring url)
 {
     const char *urlStr = env->GetStringUTFChars(url, NULL);
+    // using signal slot approach
     //emit OpenUrlClient::getInstance()->urlSelected(urlStr);
-    OpenUrlClient::getInstance()->setUrl(urlStr);
 
+    // using instance
+    OpenUrlClient::getInstance()->setUrl(urlStr);
     env->ReleaseStringUTFChars(url, urlStr);
     return;
 }

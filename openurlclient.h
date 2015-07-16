@@ -8,7 +8,7 @@ class OpenUrlClient : public QObject
     Q_OBJECT
     Q_PROPERTY(QString url READ url WRITE setUrl NOTIFY urlSelected)
 public:
-    explicit OpenUrlClient(QObject *parent = 0);
+    explicit OpenUrlClient(QObject *parent = 0, QObject *root = 0);
     QString url() const;
     static OpenUrlClient* getInstance();
 
@@ -20,6 +20,7 @@ signals:
 
 private:
     QString m_url;
+    QObject* m_root;
     static OpenUrlClient* m_instance;
 };
 
