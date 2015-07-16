@@ -20,7 +20,6 @@ public class OpenUrlClient extends QtActivity
       setIntent(intent);
       String uri = intent.getDataString();
       if (uri != null){
-        System.out.println("uri = " + uri);
         setUrl(uri);
        }
     }
